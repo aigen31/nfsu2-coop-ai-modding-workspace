@@ -27,6 +27,9 @@
 .PARAMETER SkipReferences
     Do not clone the reference projects.
 
+.PARAMETER UpdatePlaybook
+    Fetch and fast-forward the coop-anything playbook if it is already cloned.
+
 .PARAMETER InstallMods
     Copy the built ASI, its ini and FRSFastTest into the two game folders.
 
@@ -40,6 +43,7 @@ param(
     [switch]$SkipBuild,
     [switch]$SkipTests,
     [switch]$SkipReferences,
+    [switch]$UpdatePlaybook,
     [switch]$InstallMods
 )
 
@@ -153,7 +157,29 @@ if (Test-Path (Join-Path $repo 'toolchain\install.ps1')) {
     Write-Host '  nfsu2-coop not found, skipped' -ForegroundColor Yellow
 }
 
-# ----------------------------------------------------------- 5. references ---
+# ------------------------------------------------------------- 5. playbook ---
+Write-Step 'Playbook (coop-anything)'
+$playbook = Join-Path $root 'coop-anything'
+$playbookUrl = 'https://github.com/cranebeaker/coop-anything.git'
+if (-not (Test-Path (Join-Path $playbook '.git'))) {
+    if (Test-Path $playbook) { Remove-Item $playbook -Recurse -Force }
+    git clone $playbookUrl $playbook
+    if ($LASTEXITCODE -ne 0) { throw "cannot clone $playbookUrl" }
+} elseif ($UpdatePlaybook) {
+    git -C $playbook fetch --all --prune
+    git -C $playbook merge --ff-only '@{upstream}' 2>$null
+    if ($LASTEXITCODE -ne 0) { Write-Host '  local commits or no upstream: left as is' -ForegroundColor Yellow }
+}
+$bridgeClient = Join-Path $playbook 'tools\bridge\bridge_client.py'
+$inspectTool  = Join-Path $playbook 'tools\inspect\inspect_live.py'
+foreach ($f in @($bridgeClient, $inspectTool, (Join-Path $playbook 'playbook\in-game-bridge.md'))) {
+    if (-not (Test-Path $f)) { throw "playbook is incomplete, missing $f" }
+}
+$pbCommit = (git -C $playbook rev-parse --short HEAD)
+$pbBranch = (git -C $playbook rev-parse --abbrev-ref HEAD)
+Write-Host "  $pbBranch @ $pbCommit; bridge client and inspect ready"
+
+# ----------------------------------------------------------- 6. references ---
 Write-Step 'Reference projects (study copies)'
 if (-not $SkipReferences -and (Test-Path (Join-Path $repo 'tools\fetch-references.ps1'))) {
     & (Join-Path $repo 'tools\fetch-references.ps1')
@@ -161,7 +187,7 @@ if (-not $SkipReferences -and (Test-Path (Join-Path $repo 'tools\fetch-reference
     Write-Host '  skipped'
 }
 
-# --------------------------------------------------------------- 6. build ---
+# --------------------------------------------------------------- 7. build ---
 if (-not $SkipBuild) {
     Write-Step 'Build'
     if (Test-Path (Join-Path $repo 'build.ps1')) {
@@ -172,7 +198,7 @@ if (-not $SkipBuild) {
     }
 }
 
-# --------------------------------------------------------------- 7. tests ---
+# --------------------------------------------------------------- 8. tests ---
 if (-not $SkipTests) {
     Write-Step 'Tests'
     $runner = Join-Path $repo 'tests\run_all.ps1'
@@ -184,7 +210,7 @@ if (-not $SkipTests) {
     }
 }
 
-# ------------------------------------------------------------- 8. FRSFastTest ---
+# ------------------------------------------------------------- 9. FRSFastTest ---
 Write-Step 'FRSFastTest (boots straight into free roam)'
 $frs = Join-Path $refs 'FRSFastTest'
 $frsAsi = Join-Path $tc 'tools\FRSFastTest.asi'
@@ -200,7 +226,7 @@ if (Test-Path (Join-Path $frs 'games\nfsu2\FastTest.cpp')) {
     Write-Host '  reference clone missing, skipped' -ForegroundColor Yellow
 }
 
-# --------------------------------------------------------------- 9. mods in game ---
+# -------------------------------------------------------------- 10. mods in game ---
 if ($InstallMods) {
     Write-Step 'Install the mod into both test installs'
     $asi = Join-Path $repo 'build\NFSU2Coop.asi'

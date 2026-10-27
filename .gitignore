@@ -5,8 +5,8 @@ toolchain/
 references/
 
 # Game installs (several GB) and anything the game writes
-game/
-game test player/
+game-host/
+game-client/
 *.asi
 
 # Build output

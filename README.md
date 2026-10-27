@@ -7,15 +7,16 @@ Underground 2** (PC v1.2) with an AI agent — in one folder, provisioned by one
 .\setup.ps1 -InstallMods
 ```
 
-That downloads and verifies the pinned toolchain, clones the reference projects, builds the
-co-op mod, runs the full test suite and copies the plugins into both test installs.
+That downloads and verifies the pinned toolchain, clones the playbook (`coop-anything`)
+and the reference projects, builds the co-op mod, runs the full test suite and copies the
+plugins into both test installs.
 
 ## What is inside
 
 | | |
 |---|---|
 | **Co-op mod** | `nfsu2-coop/` — host-authoritative session, race director, career ledger, mirrored traffic, remote players' cars with their own model and pose, D3D9 overlay, in-game RPC bridge. Its own git repo, docs in `nfsu2-coop/docs/`. |
-| **Playbook** | `coop-anything/` — the shared co-op modding playbook this work follows (`playbook/`, `tools/`). Its own git repo. |
+| **Playbook** | `coop-anything/` — the shared co-op modding playbook this work follows (`playbook/`, `tools/`). Cloned by `setup.ps1`, updated with `-UpdatePlaybook`. |
 | **Toolchain** | `toolchain/` — i686 MinGW-w64, x64dbg (GUI + headless), Ghidra 12.2, cached archives. Installed by `setup.ps1`, never committed. |
 | **References** | `references/` — clones of [th0mk/nfsu2-web](https://github.com/th0mk/nfsu2-web) (browser port with working multiplayer), [codepdbh/nfsu2-recompiled](https://github.com/codepdbh/nfsu2-recompiled) (the game as C), [nlgxzef/NFSU2Unlimiter](https://github.com/nlgxzef/NFSU2Unlimiter) + fork (structures and addresses), [chrystianfarias/FRSFastTest](https://github.com/chrystianfarias/FRSFastTest) (boot straight into free roam), [yugecin/nfsu2-re](https://github.com/yugecin/nfsu2-re). |
 | **Two installs** | `game/` (host, profile Player) and `game test player/` (guest, profile Test). |
