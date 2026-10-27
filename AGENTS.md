@@ -10,7 +10,7 @@ One script provisions every tool inside this folder; the mod itself is `nfsu2-co
 | `setup.ps1` | provisions toolchain, references, builds and tests (idempotent) |
 | `toolchain/` | MinGW i686, x64dbg, Ghidra, cached archives — installed, not committed |
 | `references/` | study clones of nfsu2-web, nfsu2-recompiled, Unlimiter, FRSFastTest, nfsu2-re |
-| `nfsu2-coop/` | the co-op mod: source, tests, docs (its own git history) |
+| `nfsu2-coop/` | the co-op mod: `aigen31/nfsu2-coop` (branch `master`), cloned by `setup.ps1` |
 | `coop-anything/` | the co-op playbook: fork `aigen31/coop-anything`, branch `game/nfs-underground-2`, cloned by `setup.ps1` |
 | `game/`, `game test player/` | two test installs (host/profile Player, guest/profile Test) |
 | `local/` | screenshots, logs, scratch — never committed |
@@ -20,6 +20,7 @@ One script provisions every tool inside this folder; the mod itself is `nfsu2-co
 ```powershell
 .\setup.ps1                      # tools, references, build, tests
 .\setup.ps1 -Force               # re-download every pinned tool
+.\setup.ps1 -UpdateMod           # fast-forward the nfsu2-coop clone
 .\setup.ps1 -UpdatePlaybook      # fast-forward the coop-anything clone
 .\setup.ps1 -InstallMods         # copy the ASI + FRSFastTest into both game folders
 nfsu2-coop\build.ps1             # build only (server, bots, tests, plugin)

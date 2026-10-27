@@ -31,6 +31,9 @@
 .PARAMETER UpdatePlaybook
     Fetch the fork's game branch and fast-forward the playbook clone.
 
+.PARAMETER UpdateMod
+    Fetch master of aigen31/nfsu2-coop and fast-forward the mod clone.
+
 .PARAMETER InstallMods
     Copy the built ASI, its ini and FRSFastTest into the two game folders.
 
@@ -45,6 +48,7 @@ param(
     [switch]$SkipTests,
     [switch]$SkipReferences,
     [switch]$UpdatePlaybook,
+    [switch]$UpdateMod,
     [switch]$InstallMods
 )
 
@@ -148,7 +152,31 @@ if ($Force -or -not (Test-Path (Join-Path $ghidra 'support\analyzeHeadless.bat')
 }
 Write-Host '  support\analyzeHeadless.bat'
 
-# ------------------------------------------------- 4. vendor deps, python ---
+# ---------------------------------------------------------- 4. mod repository ---
+Write-Step 'Mod repository (nfsu2-coop)'
+$modUrl = 'https://github.com/aigen31/nfsu2-coop.git'
+$modBranch = 'master'
+if (-not (Test-Path (Join-Path $repo '.git'))) {
+    if (Test-Path $repo) { Remove-Item $repo -Recurse -Force }
+    git clone --branch $modBranch $modUrl $repo
+    if ($LASTEXITCODE -ne 0) { throw "cannot clone $modUrl ($modBranch)" }
+} else {
+    $origin = (git -C $repo remote get-url origin 2>$null)
+    if ($origin -and $origin -ne $modUrl) {
+        git -C $repo remote set-url origin $modUrl
+        Write-Host "  origin re-pointed: $origin -> $modUrl"
+    }
+    if ($UpdateMod) {
+        git -C $repo fetch origin $modBranch
+        git -C $repo merge --ff-only "origin/$modBranch"
+        if ($LASTEXITCODE -ne 0) { Write-Host '  local commits or diverged: left as is' -ForegroundColor Yellow }
+    }
+}
+$modCommit = (git -C $repo rev-parse --short HEAD)
+$modBranchNow = (git -C $repo rev-parse --abbrev-ref HEAD)
+Write-Host "  $modBranchNow @ $modCommit  ($modUrl)"
+
+# ------------------------------------------------- 5. vendor deps, python ---
 Write-Step 'Vendored libraries and Python test deps'
 if (Test-Path (Join-Path $repo 'toolchain\install.ps1')) {
     & (Join-Path $repo 'toolchain\install.ps1') -Prefix $mingw -Only vendor | Out-Null
@@ -158,7 +186,7 @@ if (Test-Path (Join-Path $repo 'toolchain\install.ps1')) {
     Write-Host '  nfsu2-coop not found, skipped' -ForegroundColor Yellow
 }
 
-# ------------------------------------------------------------- 5. playbook ---
+# ------------------------------------------------------------- 6. playbook ---
 Write-Step 'Playbook (coop-anything, fork)'
 $playbook = Join-Path $root 'coop-anything'
 $playbookUrl = 'https://github.com/aigen31/coop-anything.git'
@@ -192,7 +220,7 @@ if ($pbBranch -ne $playbookBranch) {
     Write-Host "  expected branch $playbookBranch; run .\setup.ps1 -UpdatePlaybook" -ForegroundColor Yellow
 }
 
-# ----------------------------------------------------------- 6. references ---
+# ----------------------------------------------------------- 7. references ---
 Write-Step 'Reference projects (study copies)'
 if (-not $SkipReferences -and (Test-Path (Join-Path $repo 'tools\fetch-references.ps1'))) {
     & (Join-Path $repo 'tools\fetch-references.ps1')
@@ -200,7 +228,7 @@ if (-not $SkipReferences -and (Test-Path (Join-Path $repo 'tools\fetch-reference
     Write-Host '  skipped'
 }
 
-# --------------------------------------------------------------- 7. build ---
+# --------------------------------------------------------------- 8. build ---
 if (-not $SkipBuild) {
     Write-Step 'Build'
     if (Test-Path (Join-Path $repo 'build.ps1')) {
@@ -211,7 +239,7 @@ if (-not $SkipBuild) {
     }
 }
 
-# --------------------------------------------------------------- 8. tests ---
+# --------------------------------------------------------------- 9. tests ---
 if (-not $SkipTests) {
     Write-Step 'Tests'
     $runner = Join-Path $repo 'tests\run_all.ps1'
@@ -223,7 +251,7 @@ if (-not $SkipTests) {
     }
 }
 
-# ------------------------------------------------------------- 9. FRSFastTest ---
+# ------------------------------------------------------------- 10. FRSFastTest ---
 Write-Step 'FRSFastTest (boots straight into free roam)'
 $frs = Join-Path $refs 'FRSFastTest'
 $frsAsi = Join-Path $tc 'tools\FRSFastTest.asi'
@@ -239,7 +267,7 @@ if (Test-Path (Join-Path $frs 'games\nfsu2\FastTest.cpp')) {
     Write-Host '  reference clone missing, skipped' -ForegroundColor Yellow
 }
 
-# -------------------------------------------------------------- 10. mods in game ---
+# -------------------------------------------------------------- 11. mods in game ---
 if ($InstallMods) {
     Write-Step 'Install the mod into both test installs'
     $asi = Join-Path $repo 'build\NFSU2Coop.asi'
