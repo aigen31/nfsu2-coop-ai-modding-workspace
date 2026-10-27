@@ -1,0 +1,52 @@
+# ---------------------------------------------------------------------------
+# Installed by setup.ps1 — never committed
+# ---------------------------------------------------------------------------
+toolchain/
+references/
+
+# Game installs (several GB) and anything the game writes
+game/
+game test player/
+*.asi
+
+# Build output
+nfsu2-coop/build/
+nfsu2-coop/vendor/enet/
+nfsu2-coop/vendor/minhook/
+nfsu2-coop/vendor/imgui/
+*.o
+*.a
+*.exe
+*.dll
+*.pdb
+*.lib
+*.exp
+
+# Local artifacts: screenshots, logs, memory dumps, decompile output
+local/
+nfsu2-coop/build/decomp/
+render-dump.txt
+*.log
+swap-state*.json
+
+# The two projects keep their own git history; this workspace repo carries only the
+# tooling around them (setup.ps1, docs, scripts).
+nfsu2-coop/
+coop-anything/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Editors / OS
+.vs/
+.vscode/
+.idea/
+*.user
+Thumbs.db
+desktop.ini
+
+# Keep documentation images (screenshots used by docs) even though *.png is local
+!docs/**/*.png
