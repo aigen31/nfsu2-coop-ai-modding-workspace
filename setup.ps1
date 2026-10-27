@@ -9,6 +9,7 @@
       toolchain\tools\x64dbg       x64dbg snapshot (32-bit debugger + headless)
       toolchain\tools\ghidra_*     Ghidra public build (decompiler)
       toolchain\cache              pinned archives, kept for offline reinstall
+      coop-anything\               fork aigen31/coop-anything, branch game/nfs-underground-2
       references\                  study clones (nfsu2-web, recompiled, Unlimiter, ...)
       game\, game test player\     two test installs (not touched unless -InstallMods)
 
@@ -28,7 +29,7 @@
     Do not clone the reference projects.
 
 .PARAMETER UpdatePlaybook
-    Fetch and fast-forward the coop-anything playbook if it is already cloned.
+    Fetch the fork's game branch and fast-forward the playbook clone.
 
 .PARAMETER InstallMods
     Copy the built ASI, its ini and FRSFastTest into the two game folders.
@@ -158,17 +159,26 @@ if (Test-Path (Join-Path $repo 'toolchain\install.ps1')) {
 }
 
 # ------------------------------------------------------------- 5. playbook ---
-Write-Step 'Playbook (coop-anything)'
+Write-Step 'Playbook (coop-anything, fork)'
 $playbook = Join-Path $root 'coop-anything'
-$playbookUrl = 'https://github.com/cranebeaker/coop-anything.git'
+$playbookUrl = 'https://github.com/aigen31/coop-anything.git'
+$playbookBranch = 'game/nfs-underground-2'
 if (-not (Test-Path (Join-Path $playbook '.git'))) {
     if (Test-Path $playbook) { Remove-Item $playbook -Recurse -Force }
-    git clone $playbookUrl $playbook
-    if ($LASTEXITCODE -ne 0) { throw "cannot clone $playbookUrl" }
-} elseif ($UpdatePlaybook) {
-    git -C $playbook fetch --all --prune
-    git -C $playbook merge --ff-only '@{upstream}' 2>$null
-    if ($LASTEXITCODE -ne 0) { Write-Host '  local commits or no upstream: left as is' -ForegroundColor Yellow }
+    git clone --branch $playbookBranch $playbookUrl $playbook
+    if ($LASTEXITCODE -ne 0) { throw "cannot clone $playbookUrl ($playbookBranch)" }
+} else {
+    $origin = (git -C $playbook remote get-url origin)
+    if ($origin -ne $playbookUrl) {
+        git -C $playbook remote set-url origin $playbookUrl
+        Write-Host "  origin re-pointed: $origin -> $playbookUrl"
+    }
+    if ($UpdatePlaybook) {
+        git -C $playbook fetch origin $playbookBranch
+        git -C $playbook checkout $playbookBranch 2>$null | Out-Null
+        git -C $playbook merge --ff-only "origin/$playbookBranch"
+        if ($LASTEXITCODE -ne 0) { Write-Host '  local commits or no upstream: left as is' -ForegroundColor Yellow }
+    }
 }
 $bridgeClient = Join-Path $playbook 'tools\bridge\bridge_client.py'
 $inspectTool  = Join-Path $playbook 'tools\inspect\inspect_live.py'
@@ -177,7 +187,10 @@ foreach ($f in @($bridgeClient, $inspectTool, (Join-Path $playbook 'playbook\in-
 }
 $pbCommit = (git -C $playbook rev-parse --short HEAD)
 $pbBranch = (git -C $playbook rev-parse --abbrev-ref HEAD)
-Write-Host "  $pbBranch @ $pbCommit; bridge client and inspect ready"
+Write-Host "  $pbBranch @ $pbCommit  ($playbookUrl)"
+if ($pbBranch -ne $playbookBranch) {
+    Write-Host "  expected branch $playbookBranch; run .\setup.ps1 -UpdatePlaybook" -ForegroundColor Yellow
+}
 
 # ----------------------------------------------------------- 6. references ---
 Write-Step 'Reference projects (study copies)'
