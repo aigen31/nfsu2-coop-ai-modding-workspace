@@ -48,7 +48,8 @@ Set-StrictMode -Version Latest
 
 $root    = $PSScriptRoot
 $tc      = Join-Path $root 'toolchain'
-$mingw   = Join-Path $tc 'mingw32'
+$mingw   = 'C:\nfsu2-toolchain'   # real path: GCC cannot run from a path with spaces
+$mingwLink = Join-Path $tc 'mingw32'
 $tools   = Join-Path $tc 'tools'
 $cache   = Join-Path $tc 'cache'
 $repo    = Join-Path $root 'nfsu2-coop'
@@ -115,8 +116,10 @@ if ($Force -or -not (Test-Path (Join-Path $mingw 'bin\g++.exe'))) {
     Expand-Zip $mingwZip $mingw 'mingw32'
 }
 Write-Host ('  ' + (& (Join-Path $mingw 'bin\g++.exe') --version | Select-Object -First 1))
-# GCC cannot run from a path with spaces, so it is reached through this junction.
-Ensure-Junction 'C:\nfsu2-toolchain' $mingw
+# GCC resolves its own real path and breaks when it contains spaces, so the compiler is
+# installed at C:\nfsu2-toolchain and the workspace reaches it through a junction.
+Ensure-Junction $mingwLink $mingw
+Ensure-Junction (Join-Path $repo 'toolchain\mingw32') $mingw
 
 # --------------------------------------------------------------- 2. x64dbg ---
 Write-Step 'x64dbg (32-bit debugger, headless)'
@@ -162,7 +165,7 @@ if (-not $SkipReferences -and (Test-Path (Join-Path $repo 'tools\fetch-reference
 if (-not $SkipBuild) {
     Write-Step 'Build'
     if (Test-Path (Join-Path $repo 'build.ps1')) {
-        $env:NFSU2_TOOLCHAIN = $mingw
+        $env:NFSU2_TOOLCHAIN = 'C:\nfsu2-toolchain'  # space-free junction; GCC breaks under a path with spaces
         & (Join-Path $repo 'build.ps1')
     } else {
         Write-Host '  nfsu2-coop\build.ps1 missing' -ForegroundColor Yellow
@@ -174,7 +177,7 @@ if (-not $SkipTests) {
     Write-Step 'Tests'
     $runner = Join-Path $repo 'tests\run_all.ps1'
     if (Test-Path $runner) {
-        $env:NFSU2_TOOLCHAIN = $mingw
+        $env:NFSU2_TOOLCHAIN = 'C:\nfsu2-toolchain'  # space-free junction; GCC breaks under a path with spaces
         & $runner
     } else {
         Write-Host '  tests\run_all.ps1 missing' -ForegroundColor Yellow
@@ -222,7 +225,7 @@ if ($InstallMods) {
 Write-Step 'Done'
 Write-Host @"
   workspace   $root
-  compiler    $mingw  (junction C:\nfsu2-toolchain)
+  compiler    $mingw  (junction $mingwLink)
   debugger    $x64\release\x32\x32dbg.exe
   decompiler  $ghidra\support\analyzeHeadless.bat
   mod         $repo

@@ -24,16 +24,18 @@ iteration cheap.
   local/                       screenshots, logs, dumps (git-ignored)
 ```
 
-`C:\nfsu2-toolchain` is a junction to `toolchain\mingw32`. GCC fails when its own path
-contains spaces, and this workspace path has one, so the compiler is always addressed
-through that junction. `nfsu2-coop\toolchain\mingw32` and `nfsu2-coop\toolchain\tools` are
-junctions into the same place, so the older project scripts keep working.
+MinGW is the one tool that cannot physically live here: GCC resolves its own real path and
+breaks on spaces, and this workspace path has one. Its files stay at `C:\nfsu2-toolchain`
+and the workspace reaches them through the junctions `toolchain\mingw32` and
+`nfsu2-coop\toolchain\mingw32`. Everything else (x64dbg, Ghidra, archives) is a real
+directory under `toolchain\`. `nfsu2-coop\toolchain\tools` is a junction to `toolchain\tools`
+so the older project scripts keep working.
 
 ## Tools and what they are for
 
 | Tool | Path | Use |
 |---|---|---|
-| MinGW-w64 i686 | `toolchain\mingw32\bin\g++.exe` | builds the ASI, the host, the bots, the tests |
+| MinGW-w64 i686 | `C:\nfsu2-toolchain\bin\g++.exe` (junction `toolchain\mingw32`) | builds the ASI, the host, the bots, the tests |
 | x64dbg | `toolchain\tools\x64dbg\release\x32\x32dbg.exe` | interactive debugging; `headless.exe` for scripted sessions |
 | Ghidra | `toolchain\tools\ghidra_12.2_PUBLIC\support\analyzeHeadless.bat` | decompile the game |
 | Decompile-all script | `nfsu2-coop\tools\ghidra_scripts\DecompileAll.java` | one `.c` + `index.tsv` into `build\decomp` |

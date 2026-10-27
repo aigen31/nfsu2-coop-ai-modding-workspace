@@ -36,9 +36,10 @@ generalise offsets without re-deriving them.
 
 ## Hard facts that cost hours
 
-- **GCC cannot run from a path with spaces.** MinGW lives at `toolchain\mingw32` and is
-  reached through the junction `C:\nfsu2-toolchain`; `build.ps1` uses that junction. Keep
-  the junction when moving things.
+- **GCC cannot run from a path with spaces.** The compiler's real files stay at
+  `C:\nfsu2-toolchain`; the workspace reaches them through the junctions
+  `toolchain\mingw32` and `nfsu2-coop\toolchain\mingw32`. Moving MinGW off that path breaks
+  linker calls; keep the junction.
 - **A new `.asi` needs a game restart.** The file is locked while the game runs; copying
   over it silently fails.
 - **Two instances, two profiles:** first launch is profile `Player` (press Enter), second
