@@ -19,8 +19,8 @@ iteration cheap.
   references/                  study clones (see references/README.md)
   nfsu2-coop/                  the mod repository
   coop-anything/               the playbook repository
-  game/                        host install (profile Player)
-  game test player/            guest install (profile Test)
+  game-host/                   host install (profile Player)
+  game-client/                 guest install (profile Test)
   local/                       screenshots, logs, dumps (git-ignored)
 ```
 
@@ -71,7 +71,7 @@ nfsu2-coop\tests\run_all.ps1      # must print ALL OK
 $env:DECOMP_OUT = "$PWD\nfsu2-coop\build\decomp"
 & toolchain\tools\ghidra_12.2_PUBLIC\support\analyzeHeadless.bat `
     "$PWD\nfsu2-coop\build\ghidra-proj" nfsu2 `
-    -import "$PWD\game\speed2.exe" `
+    -import "$PWD\game-host\speed2.exe" `
     -scriptPath "$PWD\nfsu2-coop\tools\ghidra_scripts" `
     -postScript DecompileAll.java -analysisTimeoutPerFile 1200 -deleteProject
 python nfsu2-coop\tools\search_decomp.py "0x554" "RideInfo"

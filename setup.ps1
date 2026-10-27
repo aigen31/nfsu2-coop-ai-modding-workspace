@@ -11,7 +11,7 @@
       toolchain\cache              pinned archives, kept for offline reinstall
       coop-anything\               fork aigen31/coop-anything, branch game/nfs-underground-2
       references\                  study clones (nfsu2-web, recompiled, Unlimiter, ...)
-      game\, game test player\     two test installs (not touched unless -InstallMods)
+      game-host\, game-client\      two test installs (not touched unless -InstallMods)
 
     Pins are SHA-256 checked; a wrong or missing file is re-downloaded. The script is
     idempotent: run it again after a reboot or a fresh clone.
@@ -272,7 +272,7 @@ if ($InstallMods) {
     Write-Step 'Install the mod into both test installs'
     $asi = Join-Path $repo 'build\NFSU2Coop.asi'
     if (-not (Test-Path $asi)) { throw 'build\NFSU2Coop.asi missing, run without -SkipBuild' }
-    foreach ($game in @((Join-Path $root 'game'), (Join-Path $root 'game test player'))) {
+    foreach ($game in @((Join-Path $root 'game-host'), (Join-Path $root 'game-client'))) {
         if (-not (Test-Path $game)) { Write-Host "  $game missing" -ForegroundColor Yellow; continue }
         $scripts = Join-Path $game 'scripts'
         New-Item -ItemType Directory -Force $scripts | Out-Null

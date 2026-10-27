@@ -19,7 +19,7 @@ plugins into both test installs.
 | **Playbook** | `coop-anything/` — fork [aigen31/coop-anything](https://github.com/aigen31/coop-anything/tree/game/nfs-underground-2), branch `game/nfs-underground-2`. Cloned by `setup.ps1`, updated with `-UpdatePlaybook`. |
 | **Toolchain** | `toolchain/` — i686 MinGW-w64, x64dbg (GUI + headless), Ghidra 12.2, cached archives. Installed by `setup.ps1`, never committed. |
 | **References** | `references/` — clones of [th0mk/nfsu2-web](https://github.com/th0mk/nfsu2-web) (browser port with working multiplayer), [codepdbh/nfsu2-recompiled](https://github.com/codepdbh/nfsu2-recompiled) (the game as C), [nlgxzef/NFSU2Unlimiter](https://github.com/nlgxzef/NFSU2Unlimiter) + fork (structures and addresses), [chrystianfarias/FRSFastTest](https://github.com/chrystianfarias/FRSFastTest) (boot straight into free roam), [yugecin/nfsu2-re](https://github.com/yugecin/nfsu2-re). |
-| **Two installs** | `game/` (host, profile Player) and `game test player/` (guest, profile Test). |
+| **Two installs** | `game-host/` (host, profile Player) and `game-client/` (guest, profile Test). |
 | **Scratch** | `local/` — screenshots, logs, dumps. Not committed. |
 
 ## Everyday commands

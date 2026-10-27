@@ -1,6 +1,6 @@
 # Starts the two test instances the way the workspace expects them:
-#   game\              -> profile Player  (FRSFastTest auto-continues)
-#   game test player\  -> profile Test    (profile list waits, Down + Enter picks it)
+#   game-host\   -> profile Player  (FRSFastTest auto-continues)
+#   game-client\ -> profile Test    (profile list waits, Down + Enter picks it)
 #
 #   .\launch-pair.ps1
 #   .\launch-pair.ps1 -WaitSeconds 25
@@ -10,8 +10,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$hostDir = Join-Path $root 'game'
-$guestDir = Join-Path $root 'game test player'
+$hostDir = Join-Path $root 'game-host'
+$guestDir = Join-Path $root 'game-client'
 foreach ($d in @($hostDir, $guestDir)) {
     if (-not (Test-Path (Join-Path $d 'speed2.exe'))) { throw "no speed2.exe in $d" }
 }

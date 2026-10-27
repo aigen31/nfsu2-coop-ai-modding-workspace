@@ -12,7 +12,7 @@ One script provisions every tool inside this folder; the mod itself is `nfsu2-co
 | `references/` | study clones of nfsu2-web, nfsu2-recompiled, Unlimiter, FRSFastTest, nfsu2-re |
 | `nfsu2-coop/` | the co-op mod: `aigen31/nfsu2-coop` (branch `master`), cloned by `setup.ps1` |
 | `coop-anything/` | the co-op playbook: fork `aigen31/coop-anything`, branch `game/nfs-underground-2`, cloned by `setup.ps1` |
-| `game/`, `game test player/` | two test installs (host/profile Player, guest/profile Test) |
+| `game-host/`, `game-client/` | two test installs (host/profile Player, guest/profile Test) |
 | `local/` | screenshots, logs, scratch — never committed |
 
 ## Commands
